@@ -26,7 +26,8 @@ EPOCHS         = 3
 LEARNING_RATE  = 2e-4
 
 config = AutoConfig.from_pretrained(MODEL_ID, trust_remote_code=True)
-config.init_device = "cuda"  # ← evita el error de NoneType en post_init
+config.init_device = "cuda"
+config.parallelization = "none"
 
 # --- TOKENIZADOR Y MODELO EN 4-BIT ---
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
