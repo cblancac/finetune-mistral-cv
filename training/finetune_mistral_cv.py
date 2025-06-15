@@ -110,7 +110,7 @@ trainer = SFTTrainer(
     args=training_args,
     peft_config=lora_config,
     data_collator=collator,
-    formatting_func=lambda ex: f"{ex['prompt']}\n{ex['completion']}",
+    #formatting_func=lambda ex: f"{ex['prompt']}\n{ex['completion']}",   # ← el collator ya aplica completion-only-loss
 )
 
 # --- EJECUTAR ENTRENAMIENTO Y MERGE ---
