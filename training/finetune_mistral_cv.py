@@ -80,6 +80,10 @@ lora_config = LoraConfig(
     task_type="CAUSAL_LM"
 )
 
+from inspect import signature
+print("💡 TrainingArguments real path:", TrainingArguments.__module__)
+print("💡 Firma:", signature(TrainingArguments.__init__))
+
 # --- ARGUMENTOS DE ENTRENAMIENTO ---
 training_args = TrainingArguments(
     output_dir=OUTPUT_DIR,
