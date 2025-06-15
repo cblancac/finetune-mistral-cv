@@ -11,6 +11,7 @@ from transformers import (
 )
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from transformers import AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoConfig
 from peft import LoraConfig
 
 # --- CONFIGURACIÓN ---
@@ -22,6 +23,9 @@ BATCH_SIZE     = 2
 GRAD_ACCUM     = 4
 EPOCHS         = 3
 LEARNING_RATE  = 2e-4
+
+config = AutoConfig.from_pretrained(MODEL_ID, trust_remote_code=True)
+config.init_device = "cuda"  # <-- evita el error de NoneType
 
 # --- TOKENIZADOR Y MODELO EN 4-BIT ---
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
@@ -36,6 +40,7 @@ bnb_config = BitsAndBytesConfig(
 
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
+    config=config,  # ← añade este config modificado
     device_map="auto",
     quantization_config=bnb_config,
     trust_remote_code=True,
