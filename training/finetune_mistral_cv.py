@@ -1,45 +1,43 @@
 #!/usr/bin/env python3
-# training/finetune_mistral_cv.py
-# -------------------------------------------------------------------------
-# Fine-tune de Mistral-7B-Instruct (int4 + LoRA) para extracción de CVs
-# * Pérdida solo en completion
-# * Dataset jsonl con campos: {"prompt": "...", "completion": "..."}
-# -------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+"""
+Fine-tuning estilo NER para Mistral-7B-Instruct-v0.2.
+-   Percepción SOLO sobre completion   (completion-only loss)
+-   LoRA r=8 α=16 sobre proyecciones
+-   Quant 4-bit NF4 (bnb)
+-   Truncación + padding 2048
+-   Merge final para inferencia rápida
+"""
 
-import os, torch, transformers, torchvision, torchaudio
+import os, torch, transformers, datasets
 from datasets import load_dataset
 from transformers import (
-    AutoTokenizer,
-    AutoModelForCausalLM,
-    TrainingArguments,
-    AutoConfig,
-    BitsAndBytesConfig,
+    AutoConfig, AutoTokenizer, AutoModelForCausalLM,
+    BitsAndBytesConfig, TrainingArguments
 )
-from trl import SFTTrainer                       # v0.18.x
+from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from peft import LoraConfig, PeftModel
 
-# --------------------------- 0 . Versión de libs --------------------------
-print(
-    f"🛠️  Versions → transformers {transformers.__version__} | "
-    f"torch {torch.__version__} | torchvision {torchvision.__version__} | "
-    f"torchaudio {torchaudio.__version__}"
-)
-
-# --------------------------- 1 . Parámetros -------------------------------
 MODEL_ID       = "mistralai/Mistral-7B-Instruct-v0.2"
 DATASET_PATH   = "./dataset/dataset.jsonl"
-OUTPUT_DIR     = "./checkpoints/mistral-cv-finetuned"
+OUT_DIR        = "./checkpoints/mistral-cv-finetuned"
 MERGED_DIR     = "./checkpoints/mistral-cv-merged"
-MAX_SEQ_LEN    = 2048
-BATCH_SIZE     = 2
-GRAD_ACCUM     = 4
+SEQ_LEN        = 2048
+BATCH          = 2
+ACC_STEPS      = 4
 EPOCHS         = 3
 LR             = 2e-4
 
-# --------------------------- 2 . Tokenizer & modelo -----------------------
+print(f"🔧 Versions → torch {torch.__version__} | transformers {transformers.__version__}")
+
+# --- Config & tokenizer --------------------------------------------------------------------
+cfg = AutoConfig.from_pretrained(MODEL_ID, trust_remote_code=True)
+cfg.init_device = "cuda"
+cfg.parallelization_style = "none"
+
 tok = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
-tok.pad_token = tok.eos_token               # asegura pad_token
-tok.model_max_length = MAX_SEQ_LEN
+tok.pad_token = tok.eos_token
+tok.model_max_length = SEQ_LEN      # evita warnings y errores de overflow
 
 bnb_cfg = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -48,121 +46,74 @@ bnb_cfg = BitsAndBytesConfig(
     bnb_4bit_quant_type="nf4",
 )
 
-cfg = AutoConfig.from_pretrained(MODEL_ID, trust_remote_code=True)
-cfg.init_device = "cuda"
-cfg.parallelization_style = "none"
-
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
     config=cfg,
-    device_map="auto",
     quantization_config=bnb_cfg,
+    device_map="auto",
     torch_dtype=torch.float16,
-    trust_remote_code=True,
+    trust_remote_code=True
 )
 
-# --------------------------- 3 . Dataset ----------------------------------
-ds = load_dataset("json", data_files=DATASET_PATH)["train"]
-ds = ds.train_test_split(test_size=0.1, seed=42)   # 90 / 10
+# --- Dataset -------------------------------------------------------------------------------
+raw_ds = load_dataset("json", data_files=DATASET_PATH)["train"]
+ds      = raw_ds.train_test_split(test_size=0.1, seed=42)
 
-# --------------------------- 4 . Collator personalizado -------------------
-def build_sample(example):
-    """Convierte dict→dict con ids + labels."""
-    # IDs del prompt + <eos>
-    prompt_ids = tok(
-        example["prompt"],
-        add_special_tokens=False,
-    ).input_ids + [tok.eos_token_id]
+# --- Completion-only collator --------------------------------------------------------------
+collator = DataCollatorForCompletionOnlyLM(
+    tokenizer          = tok,
+    response_template  = "completion",   # campo con la salida etiquetada
+    instruction_template = "prompt",     # campo con el texto crudo
+    mlm = False
+)
 
-    # IDs del completion + <eos>
-    comp_ids = tok(
-        example["completion"],
-        add_special_tokens=False,
-    ).input_ids + [tok.eos_token_id]
-
-    # Corte si pasa el límite (recortamos del prompt)
-    total_ids = prompt_ids + comp_ids
-    if len(total_ids) > MAX_SEQ_LEN:
-        overflow = len(total_ids) - MAX_SEQ_LEN
-        prompt_ids = prompt_ids[overflow:]
-        total_ids = prompt_ids + comp_ids
-
-    labels = [-100] * len(prompt_ids) + comp_ids       # máscara en prompt
-    example["input_ids"] = total_ids
-    example["labels"]    = labels
-    return example
-
-ds_proc = ds.map(build_sample, remove_columns=ds["train"].column_names)
-
-def collate(batch):
-    """Pad a bloque máximo."""
-    input_ids = [torch.tensor(x["input_ids"], dtype=torch.long) for x in batch]
-    labels    = [torch.tensor(x["labels"],    dtype=torch.long) for x in batch]
-
-    input_ids = torch.nn.utils.rnn.pad_sequence(
-        input_ids,
-        batch_first=True,
-        padding_value=tok.pad_token_id,
-    )
-    labels = torch.nn.utils.rnn.pad_sequence(
-        labels,
-        batch_first=True,
-        padding_value=-100,
-    )
-    attention_mask = (input_ids != tok.pad_token_id).long()
-    return {
-        "input_ids": input_ids,
-        "labels": labels,
-        "attention_mask": attention_mask,
-    }
-
-# --------------------------- 5 . LoRA -------------------------------------
+# --- LoRA ----------------------------------------------------------------------------------
 lora_cfg = LoraConfig(
-    r=8,
-    lora_alpha=16,
-    target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+    r=8, lora_alpha=16,
+    target_modules=["q_proj","k_proj","v_proj","o_proj"],
     lora_dropout=0.05,
     bias="none",
-    task_type="CAUSAL_LM",
+    task_type="CAUSAL_LM"
 )
 
-# --------------------------- 6 . TrainingArguments ------------------------
+# --- Training args -------------------------------------------------------------------------
 train_args = TrainingArguments(
-    output_dir=OUTPUT_DIR,
-    per_device_train_batch_size=BATCH_SIZE,
-    gradient_accumulation_steps=GRAD_ACCUM,
-    learning_rate=LR,
-    num_train_epochs=EPOCHS,
-    warmup_steps=20,
-    fp16=True,
-    logging_steps=10,
-    save_strategy="epoch",
-    eval_strategy="epoch",          # “eval_strategy” es válido en 4.51.x
-    save_total_limit=2,
-    report_to="none",
-    remove_unused_columns=False,
+    output_dir                 = OUT_DIR,
+    per_device_train_batch_size= BATCH,
+    gradient_accumulation_steps= ACC_STEPS,
+    learning_rate              = LR,
+    num_train_epochs           = EPOCHS,
+    warmup_steps               = 20,
+    fp16                       = True,
+    logging_steps              = 25,
+    save_strategy              = "epoch",
+    evaluation_strategy        = "epoch",
+    save_total_limit           = 2,
+    remove_unused_columns      = False,
+    report_to                  = "none"
 )
 
-# --------------------------- 7 . SFTTrainer -------------------------------
+# --- Trainer -------------------------------------------------------------------------------
 trainer = SFTTrainer(
-    model=model,
-    train_dataset=ds_proc["train"],
-    eval_dataset=ds_proc["test"],
-    args=train_args,
-    peft_config=lora_cfg,
-    data_collator=collate,
-    max_seq_length=MAX_SEQ_LEN,
-    packing=False,
+    model         = model,
+    args          = train_args,
+    train_dataset = ds["train"],
+    eval_dataset  = ds["test"],
+    peft_config   = lora_cfg,
+    data_collator = collator,
+    packing       = False           # mantiene un sample ↔ un ejemplo
 )
 
-# --------------------------- 8 . Entrenamiento + merge --------------------
+# --- Train & merge -------------------------------------------------------------------------
 if __name__ == "__main__":
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(OUT_DIR, exist_ok=True)
     trainer.train()
-    print(f"✅ Fine-tune completado. LoRA guardada en: {OUTPUT_DIR}")
+    trainer.save_model(OUT_DIR)
 
-    merged = PeftModel.from_pretrained(model, OUTPUT_DIR).merge_and_unload()
+    # --- Merge LoRA ➜ full weights (para vLLM/TGI sin overhead) -------------
+    print("➡️  Merging LoRA adapters con pesos base…")
+    merged = PeftModel.from_pretrained(model, OUT_DIR).merge_and_unload()
     os.makedirs(MERGED_DIR, exist_ok=True)
     merged.save_pretrained(MERGED_DIR)
     tok.save_pretrained(MERGED_DIR)
-    print(f"✅ Modelo mergeado listo en: {MERGED_DIR}")
+    print(f"✅ Modelo mergeado listo en {MERGED_DIR}")
