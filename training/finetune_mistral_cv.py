@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 # training/finetune_mistral_cv.py
-# Fine-tune estilo NER (loss sólo en completion) – Mistral-7B int4 + LoRA
+# Fine-tune estilo NER: loss sólo en completion
 
 import os, torch, transformers, datasets
 from datasets import load_dataset
 from transformers import (
     AutoConfig, AutoTokenizer, AutoModelForCausalLM,
-    BitsAndBytesConfig, TrainingArguments, DataCollatorWithPadding
+    BitsAndBytesConfig, TrainingArguments
 )
 from peft import LoraConfig, PeftModel
-from accelerate import Accelerator
 
-# ---------- versiones ----------
 print(f"🔧 torch {torch.__version__} | transformers {transformers.__version__}")
 
-# ---------- hiperparámetros ----
+# ---------- hiperparámetros ----------
 MODEL_ID   = "mistralai/Mistral-7B-Instruct-v0.2"
 DATASET    = "./dataset/dataset.jsonl"
 OUT_DIR    = "./checkpoints/mistral-cv-finetuned"
@@ -25,9 +23,7 @@ ACC_STEPS  = 4
 EPOCHS     = 3
 LR         = 2e-4
 
-accel = Accelerator()   # para reproducir -fp16, DDP, etc.
-
-# ---------- modelo 4-bit + tokenizador ----------
+# ---------- modelo 4-bit ----------
 cfg = AutoConfig.from_pretrained(MODEL_ID, trust_remote_code=True)
 bnb = BitsAndBytesConfig(load_in_4bit=True,
                          bnb_4bit_compute_dtype=torch.float16,
@@ -57,47 +53,41 @@ lora_cfg = LoraConfig(
 )
 
 # ---------- dataset ----------
+def norm(txt):                   # garantiza string plano
+    return txt if isinstance(txt, str) else " ".join(map(str, txt))
+
 raw = load_dataset("json", data_files=DATASET)["train"]
+raw = raw.map(lambda r: {"prompt": norm(r["prompt"]),
+                         "completion": norm(r["completion"])},
+              num_proc=4)
 
-def _to_str(x):                 # asegura texto plano
-    if not isinstance(x, str):
-        x = " ".join(map(str, x))  # lista -> string
-    return x.strip()
+data = raw.train_test_split(test_size=0.1, seed=42)
 
-def preprocess(rec):
-    rec["prompt"]     = _to_str(rec["prompt"])
-    rec["completion"] = _to_str(rec["completion"])
-    return rec
+def tok_and_mask(r):
+    p_ids = tok(r["prompt"], add_special_tokens=False,
+                truncation=True, max_length=SEQ_LEN-1)["input_ids"]
+    max_c = SEQ_LEN - len(p_ids) - 1
+    c_ids = tok(r["completion"], add_special_tokens=False,
+                truncation=True, max_length=max_c)["input_ids"]
 
-clean = raw.map(preprocess, num_proc=4)
-split = clean.train_test_split(test_size=0.1, seed=42)
+    ids    = p_ids + c_ids + [tok.eos_token_id]
+    labels = [-100]*len(p_ids) + c_ids + [tok.eos_token_id]
+    return {"input_ids": ids, "labels": labels}
 
-def tokenize(example):
-    # --- encode prompt (context) ---
-    p_ids = tok(
-        example["prompt"],
-        add_special_tokens=False,
-        truncation=True,
-        max_length=SEQ_LEN - 1     # deja sitio para al menos 1 token del completion + eos
-    )["input_ids"]
+proc = data.map(tok_and_mask, remove_columns=data["train"].column_names,
+                num_proc=4)
 
-    # --- encode completion ---
-    max_c_len = SEQ_LEN - len(p_ids) - 1
-    c_ids = tok(
-        example["completion"],
-        add_special_tokens=False,
-        truncation=True,
-        max_length=max_c_len
-    )["input_ids"]
-
-    input_ids = p_ids + c_ids + [tok.eos_token_id]
-    labels    = [-100]*len(p_ids) + c_ids + [tok.eos_token_id]   # máscara prompt
-
-    return {"input_ids": input_ids, "labels": labels}
-
-tokenized = split.map(tokenize, remove_columns=split["train"].column_names, num_proc=4)
-
-collator = DataCollatorWithPadding(tok, pad_to_multiple_of=8, return_tensors="pt")
+# ---------- collator que pad-ea input_ids y labels ----------
+def collate(batch):
+    ids   = [b["input_ids"] for b in batch]
+    lbls  = [b["labels"]     for b in batch]
+    enc   = tok.pad({"input_ids": ids}, return_tensors="pt",
+                    padding=True)
+    maxlen = enc["input_ids"].shape[1]
+    # pad labels con -100
+    padded_lbls = [torch.tensor(l + [-100]*(maxlen-len(l))) for l in lbls]
+    enc["labels"] = torch.stack(padded_lbls)
+    return enc
 
 # ---------- training args ----------
 args = TrainingArguments(
@@ -107,7 +97,7 @@ args = TrainingArguments(
     learning_rate              = LR,
     num_train_epochs           = EPOCHS,
     warmup_steps               = 20,
-    fp16                       = accel.fp16,       # se adapta a accelerate
+    fp16                       = True,       # ya no usamos accel.fp16
     logging_steps              = 25,
     save_strategy              = "epoch",
     eval_strategy              = "epoch",
@@ -115,25 +105,22 @@ args = TrainingArguments(
     report_to                  = "none"
 )
 
-# ---------- trainer ----------
 from transformers import Trainer
 trainer = Trainer(
-    model           = model,
-    args            = args,
-    train_dataset   = tokenized["train"],
-    eval_dataset    = tokenized["test"],
-    data_collator   = collator
+    model         = model,
+    args          = args,
+    train_dataset = proc["train"],
+    eval_dataset  = proc["test"],
+    data_collator = collate
 )
 
-# ---------- LOOP + merge ----------
+# ---------- loop + merge ----------
 if __name__ == "__main__":
-    accel.print("🚀 Starting fine-tuning …")
     trainer.train()
     trainer.save_model(OUT_DIR)
 
-    accel.print("🔀 Merging LoRA into base weights …")
     merged = PeftModel.from_pretrained(model, OUT_DIR).merge_and_unload()
     os.makedirs(MERGED_DIR, exist_ok=True)
     merged.save_pretrained(MERGED_DIR)
     tok.save_pretrained(MERGED_DIR)
-    accel.print(f"✅ Listo: {MERGED_DIR}")
+    print(f"✅ Fine-tuning OK – modelo mergeado en {MERGED_DIR}")
