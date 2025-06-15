@@ -7,17 +7,18 @@ from datasets import load_dataset
 from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
-    TrainingArguments
+    TrainingArguments,
+    AutoConfig,
+    BitsAndBytesConfig
 )
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
-from transformers import AutoModelForCausalLM, BitsAndBytesConfig
-from transformers import AutoConfig
-from peft import LoraConfig
+from peft import LoraConfig, PeftModel
 
 # --- CONFIGURACIÓN ---
 MODEL_ID       = "mistralai/Mistral-7B-Instruct-v0.2"
 DATASET_PATH   = "./dataset/dataset.jsonl"
 OUTPUT_DIR     = "./checkpoints/mistral-cv-finetuned"
+MERGED_DIR     = "./checkpoints/mistral-cv-merged"
 MAX_SEQ_LENGTH = 2048
 BATCH_SIZE     = 2
 GRAD_ACCUM     = 4
@@ -25,7 +26,7 @@ EPOCHS         = 3
 LEARNING_RATE  = 2e-4
 
 config = AutoConfig.from_pretrained(MODEL_ID, trust_remote_code=True)
-config.init_device = "cuda"  # <-- evita el error de NoneType
+config.init_device = "cuda"  # ← evita el error de NoneType en post_init
 
 # --- TOKENIZADOR Y MODELO EN 4-BIT ---
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
@@ -40,7 +41,7 @@ bnb_config = BitsAndBytesConfig(
 
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
-    config=config,  # ← añade este config modificado
+    config=config,
     device_map="auto",
     quantization_config=bnb_config,
     trust_remote_code=True,
@@ -100,8 +101,18 @@ trainer = SFTTrainer(
     formatting_func=lambda ex: f"{ex['prompt']}\n{ex['completion']}"
 )
 
-# --- EJECUTAR ENTRENAMIENTO ---
+# --- EJECUTAR ENTRENAMIENTO Y MERGE ---
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     trainer.train()
     print(f"✅ Fine-tuning completado. Checkpoint guardado en: {OUTPUT_DIR}")
+
+    print("🔁 Cargando modelo con LoRA para merge final...")
+    merged_model = PeftModel.from_pretrained(model, OUTPUT_DIR)
+    merged_model = merged_model.merge_and_unload()
+
+    print(f"💾 Guardando modelo mergeado en: {MERGED_DIR}")
+    os.makedirs(MERGED_DIR, exist_ok=True)
+    merged_model.save_pretrained(MERGED_DIR)
+    tokenizer.save_pretrained(MERGED_DIR)
+    print("✅ Modelo mergeado y guardado listo para inferencia.")
