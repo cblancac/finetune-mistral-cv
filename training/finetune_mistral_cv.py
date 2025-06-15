@@ -107,7 +107,6 @@ trainer = SFTTrainer(
     model=model,
     train_dataset=dataset["train"],
     eval_dataset=dataset["test"],
-    tokenizer=tokenizer,
     args=training_args,
     peft_config=lora_config,
     data_collator=collator,
