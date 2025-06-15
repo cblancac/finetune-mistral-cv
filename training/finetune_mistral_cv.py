@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # training/finetune_mistral_cv.py
 
-import os
-import torch
+import os, torch, transformers, torchvision, torchaudio
 from datasets import load_dataset
 from transformers import (
     AutoTokenizer,
@@ -14,7 +13,12 @@ from transformers import (
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from peft import LoraConfig, PeftModel
 
-from transformers import TrainingArguments
+# ----- VERIFICACIÓN DE VERSIONES -------------------------------------------
+print(
+    f"🛠️  Versions → transformers {transformers.__version__} | "
+    f"torch {torch.__version__} | torchvision {torchvision.__version__} | "
+    f"torchaudio {torchaudio.__version__}"
+)
 
 # --- CONFIGURACIÓN ---
 MODEL_ID       = "mistralai/Mistral-7B-Instruct-v0.2"
