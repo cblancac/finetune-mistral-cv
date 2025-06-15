@@ -38,6 +38,7 @@ config.parallelization_style = "none"
 # --- TOKENIZADOR Y MODELO EN 4-BIT ---
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
+tokenizer.model_max_length = 2048
 
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -106,8 +107,6 @@ trainer = SFTTrainer(
     model=model,
     train_dataset=dataset["train"],
     eval_dataset=dataset["test"],
-    # dataset_text_field="prompt",          ←  ❌  quítalo
-    max_seq_length=MAX_SEQ_LENGTH,
     tokenizer=tokenizer,
     args=training_args,
     peft_config=lora_config,
