@@ -106,13 +106,13 @@ trainer = SFTTrainer(
     model=model,
     train_dataset=dataset["train"],
     eval_dataset=dataset["test"],
-    dataset_text_field="prompt",
+    # dataset_text_field="prompt",          ←  ❌  quítalo
     max_seq_length=MAX_SEQ_LENGTH,
     tokenizer=tokenizer,
     args=training_args,
     peft_config=lora_config,
     data_collator=collator,
-    formatting_func=lambda ex: f"{ex['prompt']}\n{ex['completion']}"
+    formatting_func=lambda ex: f"{ex['prompt']}\n{ex['completion']}",
 )
 
 # --- EJECUTAR ENTRENAMIENTO Y MERGE ---
