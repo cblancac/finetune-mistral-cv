@@ -146,7 +146,6 @@ train_args = TrainingArguments(
 # --------------------------- 7 . SFTTrainer -------------------------------
 trainer = SFTTrainer(
     model=model,
-    tokenizer=tok,
     train_dataset=ds_proc["train"],
     eval_dataset=ds_proc["test"],
     args=train_args,
