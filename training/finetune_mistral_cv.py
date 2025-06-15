@@ -40,6 +40,9 @@ bnb_config = BitsAndBytesConfig(
     bnb_4bit_quant_type="nf4"
 )
 
+print("parallelization_style =", config.parallelization_style)  # <-- TEMPORAL
+
+
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
     config=config,
