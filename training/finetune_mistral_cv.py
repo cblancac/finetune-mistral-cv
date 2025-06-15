@@ -14,6 +14,8 @@ from transformers import (
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from peft import LoraConfig, PeftModel
 
+from transformers import TrainingArguments
+
 # --- CONFIGURACIÓN ---
 MODEL_ID       = "mistralai/Mistral-7B-Instruct-v0.2"
 DATASET_PATH   = "./dataset/dataset.jsonl"
