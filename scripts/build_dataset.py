@@ -38,7 +38,7 @@ def main():
         # Extrae "filename" de "labeled/filename_labeled.json"
         basename = key.split("/")[-1].replace("_labeled.json", "")
         label_map[basename] = key
-
+    
     with open(OUTPUT_FILE, "w", encoding="utf-8") as fout:
         for raw_key in raw_keys:
             # Extrae "filename" de "raw_text_without_annotations/filename.txt"
@@ -47,25 +47,31 @@ def main():
             if not lbl_key:
                 print(f"✏️  No hay etiqueta para {basename}, lo salto.")
                 continue
-
+    
             # 4) Descarga contenido
             text = get_s3_text(raw_key)
             ann_json = get_s3_text(lbl_key)
             if text is None or ann_json is None:
                 continue
-
+    
             # 5) Parseo y serialización
             try:
                 ann = json.loads(ann_json)
             except json.JSONDecodeError as e:
                 print(f"⚠️ JSON inválido en {lbl_key}: {e}")
                 continue
-
-            completion = "\n".join(f"{k}: {v}" for k, v in ann.items())
-
+    
+            # ---------- NEW: serializa el dict completo como una única cadena JSON
+            completion = json.dumps(          # ✨ reemplaza el join(…)
+                ann,
+                ensure_ascii=False,           # conserva acentos
+                separators=(",", ":")         # minificado; quita espacios extra
+                #  ↳ usa `indent=2` si prefieres pretty-print, pero sé consistente
+            )
+    
             # 6) Escribe una línea JSONL
             record = {
-                "prompt": text,
+                "prompt": text.strip(),       # ✨ elimina \n inicial/final
                 "completion": completion
             }
             fout.write(json.dumps(record, ensure_ascii=False) + "\n")
