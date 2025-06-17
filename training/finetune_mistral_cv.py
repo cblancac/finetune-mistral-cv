@@ -3,6 +3,7 @@
 # Fine-tune Mistral-7B-Instruct-v0.2 in 4-bit + LoRA
 # Loss is applied only on the assistant (structured-JSON) turn.
 
+import json
 import os, torch, transformers, datasets
 from datasets import load_dataset
 from transformers import (
@@ -32,7 +33,7 @@ MERGE_DIR  = "./checkpoints/mistral-cv-merged"
 SEQ_LEN    = 2048
 BATCH      = 2
 ACC_STEPS  = 4
-EPOCHS     = 3
+EPOCHS     = 1
 LR         = 2e-4       # try 1e-4 if you notice over-fitting
 
 # ---------------------------------------------------------------------------
@@ -84,25 +85,23 @@ def norm(x):            # input may be list or str
 
 raw = load_dataset("json", data_files=DATA_FILE)["train"]
 
-SCHEMA = (
-    '{'
-      '"certifications":"",'
-      '"contact_detail":{'
-        '"age":"",'
-        '"email":"",'
-        '"home_city":"",'
-        '"mobile":"",'
-        '"name":""'
-      '},'
-      '"education":[],'
-      '"gender":"",'
-      '"industry":"",'
-      '"skills":[],'
-      '"software_tools":[],'
-      '"work_abroad":"",'
-      '"work_experience":[]'
-    '}'
-)
+SCHEMA = json.dumps({
+    "certifications": "",
+    "contact_detail": {
+        "age": "",
+        "email": "",
+        "home_city": "",
+        "mobile": "",
+        "name": ""
+    },
+    "education": [],
+    "gender": "",
+    "industry": "",
+    "skills": [],
+    "software_tools": [],
+    "work_abroad": "",
+    "work_experience": []
+}, separators=(",", ":"))   
 
 raw = raw.map(  # convert each row into a mini-dialogue
     lambda r: {
