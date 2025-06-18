@@ -130,11 +130,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Cliente actualizado compatible con vLLM
+# 1️⃣ Medir tiempo de inicialización del cliente
+client_init_start = time.time()
+logger.info("Initializing OpenAI client for vLLM...")
 client = openai.OpenAI(
     base_url="http://localhost:8000/v1",
     api_key="EMPTY"
 )
+client_init_end = time.time()
+logger.info(f"Client initialized in {client_init_end - client_init_start:.3f}s")
 
 # El esquema que has definido
 SCHEMA = json.dumps({
@@ -159,34 +163,24 @@ SYSTEM_PROMPT = (
 )
 
 def extract_cv(cv_text):
-    # 1️⃣ Tiempo inicio preparación
-    t0 = time.time()
-    logger.info("Start building request payload")
-    
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user",   "content": cv_text}
-    ]
-    
-    t1 = time.time()
-    logger.info(f"Payload built in {t1 - t0:.3f}s")
-
-    # 2️⃣ Tiempo envío y respuesta
-    logger.info("Sending request to vLLM")
-    resp_start = time.time()
+    # 2️⃣ Antes de la llamada a la inferencia
+    logger.info("Preparing to send chat completion request...")
+    request_start = time.time()
     
     response = client.chat.completions.create(
         model="mistral-cv-merged-final",
-        messages=messages,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": cv_text}
+        ],
         max_tokens=512,
         temperature=0.0,
     )
     
-    resp_end = time.time()
-    logger.info(f"Request round-trip took {resp_end - resp_start:.3f}s")
+    # 3️⃣ Después de recibir la respuesta
+    request_end = time.time()
+    logger.info(f"Chat completion request took {request_end - request_start:.3f}s")
 
-    # 3️⃣ Total
-    logger.info(f"Total extract_cv execution: {resp_end - t0:.3f}s")
     return response.choices[0].message.content
 
 # Ejemplo de uso
