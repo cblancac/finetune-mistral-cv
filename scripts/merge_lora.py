@@ -2,8 +2,8 @@ from peft import AutoPeftModelForCausalLM
 import torch
 
 # Ruta absoluta completa corregida
-MODEL_DIR = "/checkpoints/mistral-cv-finetuned"
-MERGED_MODEL_DIR = "/checkpoints/mistral-cv-merged-final"
+MODEL_DIR = "../checkpoints/mistral-cv-finetuned"
+MERGED_MODEL_DIR = "../checkpoints/mistral-cv-merged-final"
 
 print("Loading PEFT (LoRA) model...")
 model = AutoPeftModelForCausalLM.from_pretrained(
