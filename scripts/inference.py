@@ -119,6 +119,16 @@ Family
 
 import openai
 import json
+import time
+import logging
+
+# Configuración básica de logging con timestamps
+logging.basicConfig(
+    format="%(asctime)s %(levelname)s %(message)s",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+logger = logging.getLogger(__name__)
 
 # Cliente actualizado compatible con vLLM
 client = openai.OpenAI(
@@ -148,17 +158,35 @@ SYSTEM_PROMPT = (
     f"{SCHEMA}"
 )
 
-# Función actualizada para la extracción
 def extract_cv(cv_text):
+    # 1️⃣ Tiempo inicio preparación
+    t0 = time.time()
+    logger.info("Start building request payload")
+    
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user",   "content": cv_text}
+    ]
+    
+    t1 = time.time()
+    logger.info(f"Payload built in {t1 - t0:.3f}s")
+
+    # 2️⃣ Tiempo envío y respuesta
+    logger.info("Sending request to vLLM")
+    resp_start = time.time()
+    
     response = client.chat.completions.create(
-        model="mistral-cv-merged-final",  # ruta o nombre que usa vLLM
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": cv_text}
-        ],
+        model="mistral-cv-merged-final",
+        messages=messages,
         max_tokens=512,
         temperature=0.0,
     )
+    
+    resp_end = time.time()
+    logger.info(f"Request round-trip took {resp_end - resp_start:.3f}s")
+
+    # 3️⃣ Total
+    logger.info(f"Total extract_cv execution: {resp_end - t0:.3f}s")
     return response.choices[0].message.content
 
 # Ejemplo de uso
