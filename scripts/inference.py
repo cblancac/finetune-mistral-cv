@@ -115,34 +115,7 @@ Sport
 Sleep
 Family
 2019
-Cryptocurrency
-Detection of cryptocurrencies that will be listed soon on some plat-
-forms or exchanges. Extraction of their information of interest con-
-suming some APIs and analyze the sentiment related to these coins
-through Twitter and Reddit. Bot that send this info automatically to
-a premium channel of Telegram.
-Sports Bets
-Extraction of match odds through several leagues, countries and
-sports in different bookmakers around the world. Detect arbitrage
-between them. Create a Web Service that works in Flask for show
-this information. Storage of the info about the user with sqlite3.
-Stock Market
-Loads data of different companies from Yahoo Finance source (open,
-high, low, close, adjclose and volume), as well as scaling, shuffling,
-normalizing and splitting. Sentiment analysis about such compa-
-nies (GoogleNews, NewsApi, Newscatcher, Stocktwits, Tiingo, Red-
-dit, Twitter and Finviz). Train models (LSTM - Neural Networks)
-choosing the hyperparameters using Bayesian Optimizers. Predict
-prices for the next seven days.
-Extra-Curricular Activities
-Music
-Mobility
-Sports
-Taking my first steps with the guitar and the piano
-Driving license, B. Own car. Passionate about travel and nature.
-Throughout my life I have practiced a lot of sports, I competed
-in ping pong, basketball and football. Nowadays, I an receiving
-lessons of paddle and during my free time I do swim or run."""
+"""
 
 import openai
 import json
