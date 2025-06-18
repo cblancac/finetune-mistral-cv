@@ -178,7 +178,7 @@ SYSTEM_PROMPT = (
 # Función actualizada para la extracción
 def extract_cv(cv_text):
     response = client.chat.completions.create(
-        model="checkpoints/mistral-cv-merged-final",  # ruta o nombre que usa vLLM
+        model="mistral-cv-merged-final",  # ruta o nombre que usa vLLM
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": cv_text}
