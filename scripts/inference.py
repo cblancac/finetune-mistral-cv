@@ -198,6 +198,7 @@ if __name__ == "__main__":
         futures = [executor.submit(extract_cv_wrapper, cv) for cv in cv_list]
 
         for future in as_completed(futures):
+            print(future)
             try:
                 results.append(future.result())
             except Exception as e:
