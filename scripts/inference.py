@@ -183,29 +183,7 @@ def extract_cv(cv_text):
 
     return response.choices[0].message.content
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-def extract_cv_wrapper(cv_text):
-    return extract_cv(cv_text)
-
+# Ejemplo de uso
 if __name__ == "__main__":
-    cv_list = [cv_text] * 5  # You can replace this with 5 different CVs
-
-    start = time.time()
-    results = []
-
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        futures = [executor.submit(extract_cv_wrapper, cv) for cv in cv_list]
-
-        for future in as_completed(futures):
-            print(future)
-            try:
-                results.append(future.result())
-            except Exception as e:
-                logger.error(f"Error during CV extraction: {e}")
-
-    end = time.time()
-    logger.info(f"All CVs processed in {end - start:.2f} seconds")
-
-    for idx, result in enumerate(results):
-        print(f"\n=== Result {idx + 1} ===\n{result}")
+    result = extract_cv(cv_text)
+    print(result)
