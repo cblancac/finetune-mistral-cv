@@ -70,14 +70,25 @@ def main():
     tok = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
     seq_len = args.seq_len
 
-    ds = load_dataset("json", data_files=args.jsonl)["train"]
+    # Lee el archivo línea a línea (¡sin datasets!)
+    lines = []
+    with open(args.jsonl, encoding="utf-8") as f:
+        for i, line in enumerate(f):
+            try:
+                record = json.loads(line)
+                lines.append(record)
+            except Exception as e:
+                print(f"❌ Error en la línea {i+1}: {e}")
+                continue
+
+    # Si pides --sample, selecciona solo esos ejemplos
     if args.sample:
-        ds = ds.select(range(args.sample))
+        lines = lines[:args.sample]
 
     lengths = []
     truncated = 0
 
-    for idx, rec in enumerate(tqdm(ds, desc="Tokenizando")):
+    for idx, rec in enumerate(tqdm(lines, desc="Tokenizando")):
         # Construimos exactamente la misma conversación que en el entrenamiento
         messages = [
             {"role": "system",    "content": SYSTEM_PROMPT},
