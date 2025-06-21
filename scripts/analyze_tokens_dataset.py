@@ -15,6 +15,9 @@ from tqdm.auto import tqdm
 from datasets import load_dataset
 from transformers import AutoTokenizer
 
+assistant_lengths = []  # lista para longitudes assistant
+assistant_indices = []  # índices para los top 5
+
 # ---------------------------------------------------------------------------
 # 1️⃣  Schema EXACTO utilizado en el fine-tune
 # ---------------------------------------------------------------------------
@@ -27,14 +30,14 @@ SCHEMA = json.dumps({
         "mobile": "",
         "name": ""
     },
-    "education": [],
+    "education": [{"degree": "", "degree_level": "", "end_date": "", "school_name": "", "start_date": ""}],
     "gender": "",
     "industry": "",
     "skills": [],
     "software_tools": [],
     "work_abroad": "",
-    "work_experience": []
-}, separators=(",", ":"))                     # minificado, sin espacios
+    "work_experience": [{"company": "", "end_date": "", "position": "", "start_date": ""}]
+}, separators=(",", ":"))                   # minificado, sin espacios
 
 SYSTEM_PROMPT = (
     "You are an API that extracts structured JSON from resumes.\n"
@@ -74,7 +77,7 @@ def main():
     lengths = []
     truncated = 0
 
-    for rec in tqdm(ds, desc="Tokenizando"):
+    for idx, rec in enumerate(tqdm(ds, desc="Tokenizando")):
         # Construimos exactamente la misma conversación que en el entrenamiento
         messages = [
             {"role": "system",    "content": SYSTEM_PROMPT},
@@ -91,6 +94,14 @@ def main():
         if length > seq_len:
             truncated += 1
         lengths.append(length)
+
+        # === Añadido: solo tokens assistant ===
+        assistant_ids = tok(
+            rec["completion"],
+            add_special_tokens=False,
+        )["input_ids"]
+        assistant_lengths.append(len(assistant_ids))
+        assistant_indices.append(idx)
 
     # -----------------------------------------------------------------------
     # 4️⃣  Estadísticos
@@ -118,6 +129,15 @@ def main():
         print(f"\n⚠️  {truncated} ejemplos se truncarían a {seq_len} tokens. "
               f"Considera subir SEQ_LEN a ≈ {new_len} "
               "(o trocear CVs largos en inference).")
+        
+    # --- Nuevo análisis: top 5 tokens en completions ---
+    assistant_lengths = np.array(assistant_lengths)
+    top5_indices = assistant_lengths.argsort()[-5:][::-1]  # índices top 5 (mayor a menor)
+    top5_values = assistant_lengths[top5_indices]
+
+    print("\n🧮  Top 5 valores de tokens assistant (completion):")
+    for rank, (idx, val) in enumerate(zip(top5_indices, top5_values), 1):
+        print(f"{rank}. Ejemplo #{idx} -> {val} tokens")
 
 
 if __name__ == "__main__":
