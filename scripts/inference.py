@@ -194,7 +194,7 @@ if __name__ == "__main__":
     start = time.time()
     results = []
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=10) as executor:
         futures = [executor.submit(extract_cv_wrapper, cv) for cv in cv_list]
 
         for future in as_completed(futures):
