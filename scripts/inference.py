@@ -173,7 +173,7 @@ def extract_cv(cv_text):
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": cv_text}
         ],
-        max_tokens=1024,
+        max_tokens=1024, #Dejar en 512
         temperature=0.0,
     )
     
@@ -189,7 +189,7 @@ def extract_cv_wrapper(cv_text):
     return extract_cv(cv_text)
 
 if __name__ == "__main__":
-    cv_list = [cv_text] * 5  # You can replace this with 5 different CVs
+    cv_list = [cv_text] * 10  # You can replace this with 5 different CVs
 
     start = time.time()
     results = []
