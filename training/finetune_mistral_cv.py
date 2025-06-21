@@ -30,10 +30,10 @@ MODEL_ID   = "mistralai/Mistral-7B-Instruct-v0.2"
 DATA_FILE  = "./dataset/dataset.jsonl"           # one example per line
 OUT_DIR    = "./checkpoints/mistral-cv-finetuned"
 MERGE_DIR  = "./checkpoints/mistral-cv-merged"
-SEQ_LEN    = 2048
+SEQ_LEN    = 2560
 BATCH      = 2
 ACC_STEPS  = 4
-EPOCHS     = 1
+EPOCHS     = 3
 LR         = 2e-4       # try 1e-4 if you notice over-fitting
 
 # ---------------------------------------------------------------------------
@@ -94,13 +94,13 @@ SCHEMA = json.dumps({
         "mobile": "",
         "name": ""
     },
-    "education": [],
+    "education": [{"degree": "", "degree_level": "", "end_date": "", "school_name": "", "start_date": ""}],
     "gender": "",
     "industry": "",
     "skills": [],
     "software_tools": [],
     "work_abroad": "",
-    "work_experience": []
+    "work_experience": [{"company": "", "end_date": "", "position": "", "start_date": ""}]
 }, separators=(",", ":"))   
 
 raw = raw.map(  # convert each row into a mini-dialogue
@@ -189,7 +189,7 @@ args = TrainingArguments(
     fp16                         = True,
     logging_steps                = 25,
     save_strategy                = "epoch",
-    eval_strategy          = "epoch",
+    eval_strategy                = "epoch",
     save_total_limit             = 2,
     report_to                    = "none",
 )
