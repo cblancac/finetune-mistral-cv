@@ -94,14 +94,14 @@ SCHEMA = json.dumps({
         "mobile": "",
         "name": ""
     },
-    "education": [],
+    "education": [{"degree": "", "degree_level": "", "end_date": "", "school_name": "", "start_date": ""}],
     "gender": "",
     "industry": "",
     "skills": [],
     "software_tools": [],
     "work_abroad": "",
-    "work_experience": []
-}, separators=(",", ":"))   
+    "work_experience": [{"company": "", "end_date": "", "position": "", "start_date": ""}]
+}, separators=(",", ":"))  
 
 raw = raw.map(  # convert each row into a mini-dialogue
     lambda r: {
