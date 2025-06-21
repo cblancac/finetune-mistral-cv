@@ -86,12 +86,26 @@ def main():
     truncated = 0
     assistant_lengths = []  # lista para longitudes assistant
     assistant_indices = []  # índices para los top 5
+    sysuser_lengths = []
+    sysuser_indices = []
+
 
     for idx, rec in enumerate(tqdm(lines, desc="Tokenizando")):
-        # Construimos exactamente la misma conversación que en el entrenamiento
-        messages = [
-            {"role": "system",    "content": SYSTEM_PROMPT},
-            {"role": "user",      "content": rec["prompt"]},
+        # System + user (sin assistant) para calcular longitud de contexto
+        sysuser_msgs = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": rec["prompt"]},
+        ]
+        sysuser_ids = tok.apply_chat_template(
+            sysuser_msgs,
+            tokenize=True,
+            add_generation_prompt=True,  # deja el 'cue' para assistant
+        )
+        sysuser_lengths.append(len(sysuser_ids))
+        sysuser_indices.append(idx)
+
+        # Conversación completa
+        messages = sysuser_msgs + [
             {"role": "assistant", "content": rec["completion"]},
         ]
 
@@ -139,6 +153,15 @@ def main():
         print(f"\n⚠️  {truncated} ejemplos se truncarían a {seq_len} tokens. "
               f"Considera subir SEQ_LEN a ≈ {new_len} "
               "(o trocear CVs largos en inference).")
+        
+    # --- Análisis: top 5 tokens en system+user (contexto) ---
+    sysuser_arr = np.array(sysuser_lengths)
+    sysuser_top5_indices = sysuser_arr.argsort()[-5:][::-1]  # índices top 5 (mayor a menor)
+    sysuser_top5_values = sysuser_arr[sysuser_top5_indices]
+
+    print("\n🧮  Top 5 valores de tokens system+user (contexto):")
+    for rank, (idx, val) in enumerate(zip(sysuser_top5_indices, sysuser_top5_values), 1):
+        print(f"{rank}. Ejemplo #{idx} -> {val} tokens")
         
     # --- Nuevo análisis: top 5 tokens en completions ---
     assistant_lengths = np.array(assistant_lengths)
