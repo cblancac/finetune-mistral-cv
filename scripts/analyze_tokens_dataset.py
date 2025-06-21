@@ -154,13 +154,13 @@ def main():
               f"Considera subir SEQ_LEN a ≈ {new_len} "
               "(o trocear CVs largos en inference).")
         
-    # --- Análisis: top 5 tokens en system+user (contexto) ---
+    # --- Análisis: top 15 tokens en system+user (contexto) ---
     sysuser_arr = np.array(sysuser_lengths)
-    sysuser_top5_indices = sysuser_arr.argsort()[-5:][::-1]  # índices top 5 (mayor a menor)
-    sysuser_top5_values = sysuser_arr[sysuser_top5_indices]
+    sysuser_top15_indices = sysuser_arr.argsort()[-15:][::-1]  # índices top 15 (mayor a menor)
+    sysuser_top15_values = sysuser_arr[sysuser_top15_indices]
 
-    print("\n🧮  Top 5 valores de tokens system+user (contexto):")
-    for rank, (idx, val) in enumerate(zip(sysuser_top5_indices, sysuser_top5_values), 1):
+    print("\n🧮  Top 15 valores de tokens system+user (contexto):")
+    for rank, (idx, val) in enumerate(zip(sysuser_top15_indices, sysuser_top15_values), 1):
         print(f"{rank}. Ejemplo #{idx} -> {val} tokens")
         
     # --- Nuevo análisis: top 5 tokens en completions ---
