@@ -15,9 +15,6 @@ from tqdm.auto import tqdm
 from datasets import load_dataset
 from transformers import AutoTokenizer
 
-assistant_lengths = []  # lista para longitudes assistant
-assistant_indices = []  # índices para los top 5
-
 # ---------------------------------------------------------------------------
 # 1️⃣  Schema EXACTO utilizado en el fine-tune
 # ---------------------------------------------------------------------------
@@ -87,6 +84,8 @@ def main():
 
     lengths = []
     truncated = 0
+    assistant_lengths = []  # lista para longitudes assistant
+    assistant_indices = []  # índices para los top 5
 
     for idx, rec in enumerate(tqdm(lines, desc="Tokenizando")):
         # Construimos exactamente la misma conversación que en el entrenamiento
