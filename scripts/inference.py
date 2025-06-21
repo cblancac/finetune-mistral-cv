@@ -115,60 +115,6 @@ Sport
 Sleep
 Family
 2019
-Master Theses
-Sentiment analysis on Twitter, applying different Deep Learning
-state-of-the-art techniques like transformers (BERT) using Python.
-UNED
-Degree in Mathematics
-Focus: Programming (R and C++) applying knowledge of mathemat-
-ics and statistics.
-Bachelor Theses
-Linear models in high dimensional small sampled datasets: Applied
-to real data on Colon Cancer using R.
-Courses
-Programming:
-PythonĪ Ī Ī Ī Ī
-Bash scriptingĪ Ī Ī Ī Ī
-RĪ Ī Ī Ī Ī
-MATLAB, C++Ī Ī Ī Ī Ī
-Tools:
-(Click the image)
-Hugging FaceĪ Ī Ī Ī ĪCertifications
-TensorFlow, PytorchĪ Ī Ī Ī ĪMicrosoft
-LangChainĪ Ī Ī Ī ĪSpacy, TextBlobĪ Ī Ī Ī ĪOpenCVĪ Ī Ī Ī Ī
-Microsoft Certified: Azure AI Engineer Associate
-2023Miguel Carlos
-Blanco
-Cacharrón
-Data Scientist Specialist
-Books of interest
-O’Reilly
-Packt
-Natural Language with Transformers. Building Language Applica-
-tions with Hugging Face
-Lewis Tunstall, Leandro von Werra & Thomas Wolf
-2022
-Mastering spaCy: An end-to-end practical guide to implementing
-NLP applications using the Python ecosystem
-Duygu Altinok
-2021
-Deep Learning for Coders with Fastai and Pytorch: AI Applications
-Without a PhD
-Howard, J. and Gugger, S.
-2020
-About MeO’Reilly
-I’m a person who enjoy with the small
-details of the life, learning new things,
-trying different foods and visiting new
-places. The sport, family and friends
-make my life easier.Personal Projects
-A Normal Week2021
-Program
-Sport
-2020
-Sleep
-Family
-2019
 """
 
 import openai
@@ -198,16 +144,20 @@ logger.info(f"Client initialized in {client_init_end - client_init_start:.3f}s")
 SCHEMA = json.dumps({
     "certifications": "",
     "contact_detail": {
-        "age": "", "email": "", "home_city": "", "mobile": "", "name": ""
+        "age": "",
+        "email": "",
+        "home_city": "",
+        "mobile": "",
+        "name": ""
     },
-    "education": [],
+    "education": [{"degree": "", "degree_level": "", "end_date": "", "school_name": "", "start_date": ""}],
     "gender": "",
     "industry": "",
     "skills": [],
     "software_tools": [],
     "work_abroad": "",
-    "work_experience": []
-}, separators=(",", ":"))
+    "work_experience": [{"company": "", "end_date": "", "position": "", "start_date": ""}]
+}, separators=(",", ":"))  
 
 # Prompt del sistema
 SYSTEM_PROMPT = (
