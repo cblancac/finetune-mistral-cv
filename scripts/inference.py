@@ -115,6 +115,60 @@ Sport
 Sleep
 Family
 2019
+Master Theses
+Sentiment analysis on Twitter, applying different Deep Learning
+state-of-the-art techniques like transformers (BERT) using Python.
+UNED
+Degree in Mathematics
+Focus: Programming (R and C++) applying knowledge of mathemat-
+ics and statistics.
+Bachelor Theses
+Linear models in high dimensional small sampled datasets: Applied
+to real data on Colon Cancer using R.
+Courses
+Programming:
+PythonĪ Ī Ī Ī Ī
+Bash scriptingĪ Ī Ī Ī Ī
+RĪ Ī Ī Ī Ī
+MATLAB, C++Ī Ī Ī Ī Ī
+Tools:
+(Click the image)
+Hugging FaceĪ Ī Ī Ī ĪCertifications
+TensorFlow, PytorchĪ Ī Ī Ī ĪMicrosoft
+LangChainĪ Ī Ī Ī ĪSpacy, TextBlobĪ Ī Ī Ī ĪOpenCVĪ Ī Ī Ī Ī
+Microsoft Certified: Azure AI Engineer Associate
+2023Miguel Carlos
+Blanco
+Cacharrón
+Data Scientist Specialist
+Books of interest
+O’Reilly
+Packt
+Natural Language with Transformers. Building Language Applica-
+tions with Hugging Face
+Lewis Tunstall, Leandro von Werra & Thomas Wolf
+2022
+Mastering spaCy: An end-to-end practical guide to implementing
+NLP applications using the Python ecosystem
+Duygu Altinok
+2021
+Deep Learning for Coders with Fastai and Pytorch: AI Applications
+Without a PhD
+Howard, J. and Gugger, S.
+2020
+About MeO’Reilly
+I’m a person who enjoy with the small
+details of the life, learning new things,
+trying different foods and visiting new
+places. The sport, family and friends
+make my life easier.Personal Projects
+A Normal Week2021
+Program
+Sport
+2020
+Sleep
+Family
+2019
 """
 
 import openai
@@ -189,12 +243,12 @@ def extract_cv_wrapper(cv_text):
     return extract_cv(cv_text)
 
 if __name__ == "__main__":
-    cv_list = [cv_text] * 6  # You can replace this with 5 different CVs
+    cv_list = [cv_text] * 5  # You can replace this with 5 different CVs
 
     start = time.time()
     results = []
 
-    with ThreadPoolExecutor(max_workers=6) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(extract_cv_wrapper, cv) for cv in cv_list]
 
         for future in as_completed(futures):
