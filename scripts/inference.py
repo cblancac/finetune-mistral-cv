@@ -196,7 +196,7 @@ def extract_cv(cv_text):
     # NEW: truncate before the call
     tokenizer_start = time.time()
     cv_text = truncate_text(cv_text)
-    print(f"The text analyzed ends with ... {cv_text[:20]}")
+    print(f"The text analyzed ends with ... {cv_text[-20:]}")
     tokenizer_end = time.time()
     logger.info(f"Tokenization takes {tokenizer_end - tokenizer_start:.3f}s")
 
