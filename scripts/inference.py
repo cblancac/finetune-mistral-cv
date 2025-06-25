@@ -295,7 +295,7 @@ def extract_cv(cv_text):
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": cv_text}
         ],
-        max_tokens=1024, #Dejar en 512
+        max_tokens=888, #Dejar en 512
         temperature=0.0,
     )
     
