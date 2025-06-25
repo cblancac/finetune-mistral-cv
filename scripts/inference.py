@@ -223,7 +223,7 @@ TOKENIZER = AutoTokenizer.from_pretrained(
     "checkpoints/mistral-cv-merged-final",        # local folder or HF repo
     trust_remote_code=True,
 )
-MAX_INPUT_TOKENS = 1524              # hard ceiling requested by user
+MAX_INPUT_TOKENS = 1524
 
 def truncate_text(text: str) -> str:  # ← NEW
     """
@@ -275,8 +275,6 @@ SYSTEM_PROMPT = (
     f"{SCHEMA}"
 )
 
-print("LLLL:", len(TOKENIZER(SYSTEM_PROMPT, add_special_tokens=False)["input_ids"]))
-
 def extract_cv(cv_text):
     # 2️⃣ Antes de la llamada a la inferencia
     logger.info("Preparing to send chat completion request...")
@@ -284,7 +282,6 @@ def extract_cv(cv_text):
     # NEW: truncate before the call
     tokenizer_start = time.time()
     cv_text = truncate_text(cv_text)
-    print(f"The text analyzed ends with ... {cv_text[-20:]}")
     tokenizer_end = time.time()
     logger.info(f"Tokenization takes {tokenizer_end - tokenizer_start:.3f}s")
 
@@ -295,7 +292,7 @@ def extract_cv(cv_text):
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": cv_text}
         ],
-        max_tokens=888, #Dejar en 512
+        max_tokens=888,
         temperature=0.0,
     )
     
@@ -311,22 +308,36 @@ def extract_cv_wrapper(cv_text):
     return extract_cv(cv_text)
 
 if __name__ == "__main__":
-    cv_list = [cv_text] * 5  # You can replace this with 5 different CVs
+    LOOPS          = 20          # ← nº de pasadas completas
+    PARALLEL_JOBS  = 5           # ← hilos concurrentes por pasada
+    CVs_PER_JOB    = 1           # ← cuántos CV procesa cada hilo
 
-    start = time.time()
-    results = []
+    # Pre-construye la lista de currículos para cada pasada
+    batch_cvs = [cv_text] * (PARALLEL_JOBS * CVs_PER_JOB)
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        futures = [executor.submit(extract_cv_wrapper, cv) for cv in cv_list]
+    global_start = time.time()
+    for loop in range(1, LOOPS + 1):
+        logger.info(f"===== RUN {loop}/{LOOPS} =====")
 
-        for future in as_completed(futures):
-            try:
-                results.append(future.result())
-            except Exception as e:
-                logger.error(f"Error during CV extraction: {e}")
+        start = time.time()
+        results = []
 
-    end = time.time()
-    logger.info(f"All CVs processed in {end - start:.2f} seconds")
+        with ThreadPoolExecutor(max_workers=PARALLEL_JOBS) as ex:
+            futures = [ex.submit(extract_cv_wrapper, cv) for cv in batch_cvs]
 
-    for idx, result in enumerate(results):
-        print(f"\n=== Result {idx + 1} ===\n{result}")
+            for future in as_completed(futures):
+                try:
+                    results.append(future.result())
+                except Exception as e:
+                    logger.error(f"Error during CV extraction: {e}")
+
+        dur = time.time() - start
+        logger.info(f"Run {loop} finished in {dur:.2f} s "
+                    f"(processed {len(results)} CVs)")
+
+        # (Opcional) imprime las primeras respuestas de la pasada
+        for idx, res in enumerate(results[:3], start=1):
+            print(f"\n=== Run {loop} · Result {idx} ===\n{res}")
+
+    logger.info(f"🏁 Completed {LOOPS} full runs in "
+                f"{time.time() - global_start:.2f} seconds")
