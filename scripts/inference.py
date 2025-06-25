@@ -197,7 +197,7 @@ def extract_cv(cv_text):
     tokenizer_start = time.time()
     cv_text = truncate_text(cv_text)
     tokenizer_end = time.time()
-    logger.info(f"Tokenization takes {tokenizer_start - tokenizer_end:.3f}s")
+    logger.info(f"Tokenization takes {tokenizer_end - tokenizer_start:.3f}s")
 
     request_start = time.time()
     response = client.chat.completions.create(
