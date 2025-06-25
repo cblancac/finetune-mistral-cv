@@ -134,7 +134,7 @@ logger = logging.getLogger(__name__)
 
 # NEW: load the same tokenizer you used for fine-tuning / merge
 TOKENIZER = AutoTokenizer.from_pretrained(
-    "mistral-cv-merged-final",        # local folder or HF repo
+    "checkpoints/mistral-cv-merged-final",        # local folder or HF repo
     trust_remote_code=True,
 )
 MAX_INPUT_TOKENS = 1536              # hard ceiling requested by user
@@ -192,7 +192,7 @@ SYSTEM_PROMPT = (
 def extract_cv(cv_text):
     # 2️⃣ Antes de la llamada a la inferencia
     logger.info("Preparing to send chat completion request...")
-    
+
     # NEW: truncate before the call
     tokenizer_start = time.time()
     cv_text = truncate_text(cv_text)
