@@ -115,6 +115,92 @@ Sport
 Sleep
 Family
 2019
+Miguel Carlos
+Blanco
+Cacharrón
+2023 –
+Present
+(Remote)Consultancy | Start-up
+Senior AI Data Scientist at Turing Challenge
+Creation of QnA and Chatbots systems using vector databases
+(Pinecone, Elasticsearch or Azure Cognitive Search), RAG and LLM
+models (GPT3.5 or GPT4). Fine-tuned of LLMs, like GPT-3.5 Turbo
+or Llama, to improve the performance of GPT4, reducing prices up
+to 20x lower for inference. Client: Repsol, Microsoft and Mediapro.
+2022 – 2023
+(Remote)Consultancy | Start-up
+Data Scientist Specialist at Foqum Analytics
+Multi-label text classification with FastAi or Hugging Face (using
+longformers). NER using regex for entities with fixed patterns,
+and Hugging Face, in another case. Use of Haystack to build QA
+pipelines, storing the documents in Elasticsearch. Client: Lefebvre.
+2020 – 2022
+(Hybrid)Consultancy
+Engineer NLP at NTT Data
+Extract texts from different types of documents using AWS Textract.
+Classify them by using Neural Networks, SVM, Naive Bayes or Decis-
+sion Trees. Get the entities present in the documents (Regex, Spacy
+and TextBlob). Use of Microsoft Azure (Repos, Pipelines). Use of
+Jira as an agile methodology. Clients: Iberdrola Spain, Vivo Brazil
+and Entel Chile.
+2019 – 2020
+(Presential)Consultancy
+Data Scientist at Strategy Big Data
+Computer Vision - Improving the quality of the text extracted using
+free OCR like pytesseract. Bayesian Optimizers to choose the best
+combinations of hyperparameters.
+Natural Language Processing - Extract the entities required in the
+documents. Client: Banco Santander.
+Data Scientist Specialist
+i April 11, 1992
+ć Gines, Sevilla (Spain)
+× +34 603 468 505
+Ɵ carblacac7@gmail.com
+~ Spanish
+Social Network
+]
+a
+Education
+Study
+LinkedIn
+2018 – 2019
+Github
+Hugging Face
+Languages
+2013 – 2018
+SpanishĪ Ī Ī Ī Ī
+EnglishĪ Ī Ī Ī Ī
+FrenchĪ Ī Ī Ī Ī
+Skills
+CSIC and UIMP
+Master in Data Science
+Focus: Machine Learning and Deep Learning with Python and R.
+Techniques of NLP, CV, Web Scrapping and ETL. Use of relational
+and non-relational databases.
+Master Theses
+Sentiment analysis on Twitter, applying different Deep Learning
+state-of-the-art techniques like transformers (BERT) using Python.
+UNED
+Degree in Mathematics
+Focus: Programming (R and C++) applying knowledge of mathemat-
+ics and statistics.
+Bachelor Theses
+Linear models in high dimensional small sampled datasets: Applied
+to real data on Colon Cancer using R.
+Courses
+Programming:
+PythonĪ Ī Ī Ī Ī
+Bash scriptingĪ Ī Ī Ī Ī
+RĪ Ī Ī Ī Ī
+MATLAB, C++Ī Ī Ī Ī Ī
+Tools:
+(Click the image)
+Hugging FaceĪ Ī Ī Ī ĪCertifications
+TensorFlow, PytorchĪ Ī Ī Ī ĪMicrosoft
+LangChainĪ Ī Ī Ī ĪSpacy, TextBlobĪ Ī Ī Ī ĪOpenCVĪ Ī Ī Ī Ī
+Microsoft Certified: Azure AI Engineer Associate
+2023Miguel Carlos
+Blanco
 """
 
 import openai
