@@ -275,6 +275,8 @@ SYSTEM_PROMPT = (
     f"{SCHEMA}"
 )
 
+print("LLLL:", len(TOKENIZER(SYSTEM_PROMPT, add_special_tokens=False)["input_ids"]))
+
 def extract_cv(cv_text):
     # 2️⃣ Antes de la llamada a la inferencia
     logger.info("Preparing to send chat completion request...")
@@ -293,7 +295,7 @@ def extract_cv(cv_text):
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": cv_text}
         ],
-        max_tokens=924, #Dejar en 512
+        max_tokens=1024, #Dejar en 512
         temperature=0.0,
     )
     
