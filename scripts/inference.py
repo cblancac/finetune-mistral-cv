@@ -223,7 +223,7 @@ TOKENIZER = AutoTokenizer.from_pretrained(
     "checkpoints/mistral-cv-merged-final",        # local folder or HF repo
     trust_remote_code=True,
 )
-MAX_INPUT_TOKENS = 1536              # hard ceiling requested by user
+MAX_INPUT_TOKENS = 1524              # hard ceiling requested by user
 
 def truncate_text(text: str) -> str:  # ← NEW
     """
