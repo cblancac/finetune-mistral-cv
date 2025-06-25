@@ -336,7 +336,7 @@ if __name__ == "__main__":
                     f"(processed {len(results)} CVs)")
 
         # (Opcional) imprime las primeras respuestas de la pasada
-        for idx, res in enumerate(results[:3], start=1):
+        for idx, res in enumerate(results[:5], start=1):
             print(f"\n=== Run {loop} · Result {idx} ===\n{res}")
 
     logger.info(f"🏁 Completed {LOOPS} full runs in "
