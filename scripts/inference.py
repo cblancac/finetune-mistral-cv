@@ -122,6 +122,8 @@ import json
 import time
 import logging
 
+from transformers import AutoTokenizer
+
 # Configuración básica de logging con timestamps
 logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s",
@@ -129,6 +131,27 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 logger = logging.getLogger(__name__)
+
+# NEW: load the same tokenizer you used for fine-tuning / merge
+TOKENIZER = AutoTokenizer.from_pretrained(
+    "mistral-cv-merged-final",        # local folder or HF repo
+    trust_remote_code=True,
+)
+MAX_INPUT_TOKENS = 1536              # hard ceiling requested by user
+
+def truncate_text(text: str) -> str:  # ← NEW
+    """
+    Keep only the first MAX_INPUT_TOKENS tokens of `text`
+    (counted with the Mistral tokenizer) and decode back to UTF-8.
+    """
+    ids = TOKENIZER(text, add_special_tokens=False)["input_ids"]
+    if len(ids) > MAX_INPUT_TOKENS:
+        ids = ids[:MAX_INPUT_TOKENS]
+    return TOKENIZER.decode(
+        ids,
+        skip_special_tokens=True,
+        clean_up_tokenization_spaces=True,
+    )
 
 # 1️⃣ Medir tiempo de inicialización del cliente
 client_init_start = time.time()
@@ -169,8 +192,14 @@ SYSTEM_PROMPT = (
 def extract_cv(cv_text):
     # 2️⃣ Antes de la llamada a la inferencia
     logger.info("Preparing to send chat completion request...")
-    request_start = time.time()
     
+    # NEW: truncate before the call
+    tokenizer_start = time.time()
+    cv_text = truncate_text(cv_text)
+    tokenizer_end = time.time()
+    logger.info(f"Tokenization takes {tokenizer_start - tokenizer_end:.3f}s")
+
+    request_start = time.time()
     response = client.chat.completions.create(
         model="mistral-cv-merged-final",
         messages=[
