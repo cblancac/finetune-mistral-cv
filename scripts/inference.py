@@ -1,208 +1,3 @@
-cv_text = """Working Experience
-Miguel Carlos
-Blanco
-Cacharrón
-2023 –
-Present
-(Remote)Consultancy | Start-up
-Senior AI Data Scientist at Turing Challenge
-Creation of QnA and Chatbots systems using vector databases
-(Pinecone, Elasticsearch or Azure Cognitive Search), RAG and LLM
-models (GPT3.5 or GPT4). Fine-tuned of LLMs, like GPT-3.5 Turbo
-or Llama, to improve the performance of GPT4, reducing prices up
-to 20x lower for inference. Client: Repsol, Microsoft and Mediapro.
-2022 – 2023
-(Remote)Consultancy | Start-up
-Data Scientist Specialist at Foqum Analytics
-Multi-label text classification with FastAi or Hugging Face (using
-longformers). NER using regex for entities with fixed patterns,
-and Hugging Face, in another case. Use of Haystack to build QA
-pipelines, storing the documents in Elasticsearch. Client: Lefebvre.
-2020 – 2022
-(Hybrid)Consultancy
-Engineer NLP at NTT Data
-Extract texts from different types of documents using AWS Textract.
-Classify them by using Neural Networks, SVM, Naive Bayes or Decis-
-sion Trees. Get the entities present in the documents (Regex, Spacy
-and TextBlob). Use of Microsoft Azure (Repos, Pipelines). Use of
-Jira as an agile methodology. Clients: Iberdrola Spain, Vivo Brazil
-and Entel Chile.
-2019 – 2020
-(Presential)Consultancy
-Data Scientist at Strategy Big Data
-Computer Vision - Improving the quality of the text extracted using
-free OCR like pytesseract. Bayesian Optimizers to choose the best
-combinations of hyperparameters.
-Natural Language Processing - Extract the entities required in the
-documents. Client: Banco Santander.
-Data Scientist Specialist
-i April 11, 1992
-ć Gines, Sevilla (Spain)
-× +34 603 468 505
-Ɵ carblacac7@gmail.com
-~ Spanish
-Social Network
-]
-a
-Education
-Study
-LinkedIn
-2018 – 2019
-Github
-Hugging Face
-Languages
-2013 – 2018
-SpanishĪ Ī Ī Ī Ī
-EnglishĪ Ī Ī Ī Ī
-FrenchĪ Ī Ī Ī Ī
-Skills
-CSIC and UIMP
-Master in Data Science
-Focus: Machine Learning and Deep Learning with Python and R.
-Techniques of NLP, CV, Web Scrapping and ETL. Use of relational
-and non-relational databases.
-Master Theses
-Sentiment analysis on Twitter, applying different Deep Learning
-state-of-the-art techniques like transformers (BERT) using Python.
-UNED
-Degree in Mathematics
-Focus: Programming (R and C++) applying knowledge of mathemat-
-ics and statistics.
-Bachelor Theses
-Linear models in high dimensional small sampled datasets: Applied
-to real data on Colon Cancer using R.
-Courses
-Programming:
-PythonĪ Ī Ī Ī Ī
-Bash scriptingĪ Ī Ī Ī Ī
-RĪ Ī Ī Ī Ī
-MATLAB, C++Ī Ī Ī Ī Ī
-Tools:
-(Click the image)
-Hugging FaceĪ Ī Ī Ī ĪCertifications
-TensorFlow, PytorchĪ Ī Ī Ī ĪMicrosoft
-LangChainĪ Ī Ī Ī ĪSpacy, TextBlobĪ Ī Ī Ī ĪOpenCVĪ Ī Ī Ī Ī
-Microsoft Certified: Azure AI Engineer Associate
-2023Miguel Carlos
-Blanco
-Cacharrón
-Data Scientist Specialist
-Books of interest
-O’Reilly
-Packt
-Natural Language with Transformers. Building Language Applica-
-tions with Hugging Face
-Lewis Tunstall, Leandro von Werra & Thomas Wolf
-2022
-Mastering spaCy: An end-to-end practical guide to implementing
-NLP applications using the Python ecosystem
-Duygu Altinok
-2021
-Deep Learning for Coders with Fastai and Pytorch: AI Applications
-Without a PhD
-Howard, J. and Gugger, S.
-2020
-About MeO’Reilly
-I’m a person who enjoy with the small
-details of the life, learning new things,
-trying different foods and visiting new
-places. The sport, family and friends
-make my life easier.Personal Projects
-A Normal Week2021
-Program
-Sport
-2020
-Sleep
-Family
-2019
-Miguel Carlos
-Blanco
-Cacharrón
-2023 –
-Present
-(Remote)Consultancy | Start-up
-Senior AI Data Scientist at Turing Challenge
-Creation of QnA and Chatbots systems using vector databases
-(Pinecone, Elasticsearch or Azure Cognitive Search), RAG and LLM
-models (GPT3.5 or GPT4). Fine-tuned of LLMs, like GPT-3.5 Turbo
-or Llama, to improve the performance of GPT4, reducing prices up
-to 20x lower for inference. Client: Repsol, Microsoft and Mediapro.
-2022 – 2023
-(Remote)Consultancy | Start-up
-Data Scientist Specialist at Foqum Analytics
-Multi-label text classification with FastAi or Hugging Face (using
-longformers). NER using regex for entities with fixed patterns,
-and Hugging Face, in another case. Use of Haystack to build QA
-pipelines, storing the documents in Elasticsearch. Client: Lefebvre.
-2020 – 2022
-(Hybrid)Consultancy
-Engineer NLP at NTT Data
-Extract texts from different types of documents using AWS Textract.
-Classify them by using Neural Networks, SVM, Naive Bayes or Decis-
-sion Trees. Get the entities present in the documents (Regex, Spacy
-and TextBlob). Use of Microsoft Azure (Repos, Pipelines). Use of
-Jira as an agile methodology. Clients: Iberdrola Spain, Vivo Brazil
-and Entel Chile.
-2019 – 2020
-(Presential)Consultancy
-Data Scientist at Strategy Big Data
-Computer Vision - Improving the quality of the text extracted using
-free OCR like pytesseract. Bayesian Optimizers to choose the best
-combinations of hyperparameters.
-Natural Language Processing - Extract the entities required in the
-documents. Client: Banco Santander.
-Data Scientist Specialist
-i April 11, 1992
-ć Gines, Sevilla (Spain)
-× +34 603 468 505
-Ɵ carblacac7@gmail.com
-~ Spanish
-Social Network
-]
-a
-Education
-Study
-LinkedIn
-2018 – 2019
-Github
-Hugging Face
-Languages
-2013 – 2018
-SpanishĪ Ī Ī Ī Ī
-EnglishĪ Ī Ī Ī Ī
-FrenchĪ Ī Ī Ī Ī
-Skills
-CSIC and UIMP
-Master in Data Science
-Focus: Machine Learning and Deep Learning with Python and R.
-Techniques of NLP, CV, Web Scrapping and ETL. Use of relational
-and non-relational databases.
-Master Theses
-Sentiment analysis on Twitter, applying different Deep Learning
-state-of-the-art techniques like transformers (BERT) using Python.
-UNED
-Degree in Mathematics
-Focus: Programming (R and C++) applying knowledge of mathemat-
-ics and statistics.
-Bachelor Theses
-Linear models in high dimensional small sampled datasets: Applied
-to real data on Colon Cancer using R.
-Courses
-Programming:
-PythonĪ Ī Ī Ī Ī
-Bash scriptingĪ Ī Ī Ī Ī
-RĪ Ī Ī Ī Ī
-MATLAB, C++Ī Ī Ī Ī Ī
-Tools:
-(Click the image)
-Hugging FaceĪ Ī Ī Ī ĪCertifications
-TensorFlow, PytorchĪ Ī Ī Ī ĪMicrosoft
-LangChainĪ Ī Ī Ī ĪSpacy, TextBlobĪ Ī Ī Ī ĪOpenCVĪ Ī Ī Ī Ī
-Microsoft Certified: Azure AI Engineer Associate
-2023Miguel Carlos
-Blanco
-"""
-
 import openai
 import json
 import time
@@ -243,7 +38,8 @@ def truncate_text(text: str) -> str:  # ← NEW
 client_init_start = time.time()
 logger.info("Initializing OpenAI client for vLLM...")
 client = openai.OpenAI(
-    base_url="http://localhost:8000/v1",
+    #base_url="http://localhost:8000/v1",
+    base_url="https://u9odeh9fcwpjzp-8000.proxy.runpod.net/v1",
     api_key="EMPTY"
 )
 client_init_end = time.time()
@@ -308,23 +104,40 @@ def extract_cv_wrapper(cv_text):
     return extract_cv(cv_text)
 
 if __name__ == "__main__":
-    LOOPS          = 20          # ← nº de pasadas completas
-    PARALLEL_JOBS  = 5           # ← hilos concurrentes por pasada
-    CVs_PER_JOB    = 1           # ← cuántos CV procesa cada hilo
 
-    # Pre-construye la lista de currículos para cada pasada
-    batch_cvs = [cv_text] * (PARALLEL_JOBS * CVs_PER_JOB)
+    import os
+
+    DATASET_DIR = "dataset_txt"
+    PARALLEL_JOBS = 8
+    CVs_TOTAL = 400
+    BATCH_SIZE = PARALLEL_JOBS  # 8 per batch
+    LOOPS = CVs_TOTAL // BATCH_SIZE
+
+    logger.info(f"📥 Loading {CVs_TOTAL} CVs from {DATASET_DIR}...")
+
+    load_start = time.time()
+    # Load all text files from the directory
+    all_cvs = []
+    filenames = sorted(os.listdir(DATASET_DIR))[:CVs_TOTAL]
+    for fname in filenames:
+        path = os.path.join(DATASET_DIR, fname)
+        with open(path, "r", encoding="utf-8") as f:
+            all_cvs.append(f.read())
+    load_end = time.time()
+
+    logger.info(f"✅ Loaded {len(all_cvs)} CVs in {load_end - load_start:.2f} seconds.")
+
+    # Now, split into batches
+    batches = [all_cvs[i:i + BATCH_SIZE] for i in range(0, CVs_TOTAL, BATCH_SIZE)]
 
     global_start = time.time()
-    for loop in range(1, LOOPS + 1):
+    for loop, batch in enumerate(batches, start=1):
         logger.info(f"===== RUN {loop}/{LOOPS} =====")
-
         start = time.time()
         results = []
 
         with ThreadPoolExecutor(max_workers=PARALLEL_JOBS) as ex:
-            futures = [ex.submit(extract_cv_wrapper, cv) for cv in batch_cvs]
-
+            futures = [ex.submit(extract_cv_wrapper, cv) for cv in batch]
             for future in as_completed(futures):
                 try:
                     results.append(future.result())
@@ -335,9 +148,9 @@ if __name__ == "__main__":
         logger.info(f"Run {loop} finished in {dur:.2f} s "
                     f"(processed {len(results)} CVs)")
 
-        # (Opcional) imprime las primeras respuestas de la pasada
-        for idx, res in enumerate(results[:5], start=1):
+        # (Optional) Print the first few outputs of each batch
+        for idx, res in enumerate(results[:2], start=1):
             print(f"\n=== Run {loop} · Result {idx} ===\n{res}")
 
-    logger.info(f"🏁 Completed {LOOPS} full runs in "
-                f"{time.time() - global_start:.2f} seconds")
+    total_duration = time.time() - global_start
+    logger.info(f"🏁 All batches processed in {total_duration:.2f} seconds")
