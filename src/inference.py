@@ -1,20 +1,12 @@
-import openai
+# src/inference.py
 import json
 import logging
 import time
-from transformers import AutoTokenizer
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from config import CHECKPOINT_DIR, MAX_INPUT_TOKENS, MAX_OUTPUT_TOKENS, TEMPERATURE
+from schemas import SCHEMA
 
-from config import (
-    RUNPOD_BASE_URL,
-    API_KEY,
-    MODEL_NAME,
-    TOKENIZER_PATH,
-    MAX_INPUT_TOKENS,
-    MAX_OUTPUT_TOKENS,
-    TEMPERATURE,
-)
-
-# Setup logging
 logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s",
     level=logging.INFO,
@@ -22,79 +14,46 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Load tokenizer once
-logger.info(f"Loading tokenizer from '{TOKENIZER_PATH}'")
-TOKENIZER = AutoTokenizer.from_pretrained(
-    TOKENIZER_PATH,
+logger.info("Loading tokenizer and model...")
+tokenizer = AutoTokenizer.from_pretrained(CHECKPOINT_DIR, trust_remote_code=True)
+model = AutoModelForCausalLM.from_pretrained(
+    CHECKPOINT_DIR,
+    device_map="auto",
+    torch_dtype=torch.float16,
     trust_remote_code=True,
 )
 
-def load_schema() -> dict:
-    """Load JSON schema from schemas.py."""
-    try:
-        from schemas import SCHEMA
-        return SCHEMA
-    except ImportError as e:
-        logger.error(f"Schema import error: {e}")
-        raise
+generator = pipeline(
+    "text-generation",
+    model=model,
+    tokenizer=tokenizer,
+    max_new_tokens=MAX_OUTPUT_TOKENS,
+    temperature=TEMPERATURE,
+    do_sample=False,
+)
 
-SCHEMA = load_schema()
-
-# Construct system prompt
 SYSTEM_PROMPT = (
     "You are an API that extracts structured JSON from resumes.\n"
     "Return *only* valid JSON matching exactly this schema:\n"
-    f"{json.dumps(SCHEMA, separators=(',', ':'))}"
-)
-
-# Initialize OpenAI client
-logger.info("Initializing OpenAI client...")
-client = openai.OpenAI(
-    base_url=RUNPOD_BASE_URL,
-    api_key=API_KEY,
+    f"{json.dumps(SCHEMA, separators=(',', ':'))}\n\n"
+    "Resume text:\n"
 )
 
 def truncate_text(text: str) -> str:
-    """
-    Truncate text to MAX_INPUT_TOKENS tokens to avoid exceeding model limits.
-    """
-    ids = TOKENIZER.encode(text, add_special_tokens=False)
+    ids = tokenizer.encode(text, add_special_tokens=False)
     if len(ids) > MAX_INPUT_TOKENS:
         ids = ids[:MAX_INPUT_TOKENS]
-    return TOKENIZER.decode(
-        ids,
-        skip_special_tokens=True,
-        clean_up_tokenization_spaces=True,
-    )
+    return tokenizer.decode(ids, skip_special_tokens=True)
 
 def extract_cv(cv_text: str) -> dict:
-    """
-    Send truncated CV text to RunPod-hosted inference endpoint and parse JSON response.
-    """
-    truncated_text = truncate_text(cv_text)
-    
+    prompt = SYSTEM_PROMPT + truncate_text(cv_text)
     start_time = time.time()
-    try:
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": truncated_text}
-            ],
-            max_tokens=MAX_OUTPUT_TOKENS,
-            temperature=TEMPERATURE,
-        )
-        duration = time.time() - start_time
-        logger.info(f"Inference completed in {duration:.2f}s")
-    except Exception as e:
-        logger.error(f"Inference request failed: {e}")
-        raise
+    output = generator(prompt, return_full_text=False)[0]['generated_text']
+    duration = time.time() - start_time
+    logger.info(f"Inference completed in {duration:.2f}s")
 
-    # Parse response content into JSON
-    try:
-        extracted_json = json.loads(response.choices[0].message.content)
-        return extracted_json
-    except json.JSONDecodeError as e:
-        logger.error(f"JSON parsing failed: {e}")
-        raise
+    json_start = output.find('{')
+    json_end = output.rfind('}') + 1
+    json_str = output[json_start:json_end]
 
+    return json.loads(json_str)
