@@ -10,7 +10,7 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Set defaults
-ENV AWS_DEFAULT_REGION=us-east-1
+ENV AWS_DEFAULT_REGION=ap-southeast-1
 ENV MODEL_S3_PATH="s3://test-s3-putobject-presigned/models/mistral-cv-merged-final.zip"
 
 # Build args (include session token)
